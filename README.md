@@ -32,7 +32,23 @@ make clean
 
 None currently identified.
 
-## Future Expansion
+## Big-O Analysis:
+The time complexity for translation is O(1) for LEVELS=1.
+Space complexity depends on the number of allocated pages.
 
-- Support for memory deallocation.
-- Optimization for larger page tables.
+## Deallocation Interface:
+This page table implementation supports deallocation of pages via the following function:
+
+```
+void page_deallocate(size_t va);
+```
+
+This function will deallocate the page corresponding to the virtual address va. It removes the mapping from the page tables and frees the associated physical memory. Additionally, it can clean up any page tables that become unnecessary due to the deallocation.
+
+Feasibility Without Modifying Existing Interfaces or Internals:
+- It is possible to implement page_deallocate without changing the existing page_allocate, translate, or their internal implementations. The existing code uses multi-level page tables to manage memory mappings, with each level being an array of entries that either point to the next-level page table or to the physical memory (data page).
+
+Why we can implement page_deallocate without modifications:
+- Data Structures Remain Unchanged: The existing page tables and their structures are sufficient to support deallocation. The page tables are hierarchical, and each entry contains enough information (validity bit and pointer) to navigate and modify the mappings.
+- Separate Functionality: page_deallocate can be written as a separate function that mirrors the traversal logic of translate and page_allocate. It will navigate through the page tables to the target entry, remove the mapping, and free the associated memory without interfering with the existing functions.
+- No Impact on page_allocate and translate: Since page_deallocate operates independently, it doesn't require any changes to the page_allocate or translate functions. It doesn't modify any shared internal mechanisms or assumptions used by these functions.
